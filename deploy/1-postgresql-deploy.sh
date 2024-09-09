@@ -32,8 +32,8 @@ elif [[ "$os_base" == "c"  || "$os_base" == "r" ]]
 then
   (dnf install postgresql-devel postgresql-server > /dev/null 2>&1) || (postgresql-setup initdb > /dev/null 2>&1) 
   sleep 10
-  sed -i "s|host    all             all             127.0.0.1/32            ident|host    all             all             127.0.0.1/32            md5|" /var/lib/pgsql/data/pg_hba.conf
-  sed -i "s|host    all             all             ::1/128                 ident|host    all             all             ::1/128                 md5|" /var/lib/pgsql/data/pg_hba.conf
+  sed -i "s|host all all 127.0.0.1/32 ident|host all all 127.0.0.1/32 md5|" /var/lib/pgsql/data/pg_hba.conf
+  sed -i "s|host all all ::1/128 ident|host all all ::1/128 md5|" /var/lib/pgsql/data/pg_hba.conf
   (systemctl start postgresql > /dev/null 2>&1) || (systemctl enable postgresql > /dev/null 2>&1)
   ($netstat | grep -q ':5432')
 fi
