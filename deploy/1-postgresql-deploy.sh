@@ -61,14 +61,14 @@ fi
 if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
 then
   (apt-get install postgresql -qqy) ||  (echo -e "\033[0;101mAn error occured while installing PostgreSQL\033[0m"; exit 1)
-  sed -i "/# IPv4 local connections:/ a \host all all $API_server md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
+  sed -i "/# IPv4 local connections:/ a \host all all $nw_api_ip md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
 elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]] || (echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"; exit 1)
 then
   (dnf install postgresql-devel postgresql-server -qqy) || (echo -e "\033[0;101mAn error occured while installing PostgreSQL\033[0m"; exit 1)
   (postgresql-setup initdb) || (echo -e "\033[0;101mAn error occurred while initializing PostgreSQL\033[0m"; exit 1)
   sed -i -r 's|host\s+all\s+all\s+127.0.0.1/32\s+ident|host all all 127.0.0.1/32 md5|' /var/lib/pgsql/data/pg_hba.conf
   sed -i -r 's|host\s+all\s+all\s+::1/128\s+ident|host all all ::1/128 md5|' /var/lib/pgsql/data/pg_hba.conf
-  sed -i "/# IPv4 local connections:/ a \host all all $API_server md5" /var/lib/pgsql/data/pg_hba.conf
+  sed -i "/# IPv4 local connections:/ a \host all all $nw_api_ip md5" /var/lib/pgsql/data/pg_hba.conf
 fi
 
 systemctl reenable postgresql > /dev/null 2>&1
