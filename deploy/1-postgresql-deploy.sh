@@ -24,9 +24,14 @@ for i in "$@"; do
   esac
 done
 
-if [ -z "$nw_api_password" ]; then read -t 30 -p "Enter a nw_api user password: " nw_api_password ; fi
-if [ -z "$nw_cabinet_password" ]; then read -t 30 -p "Enter a nw_cabinet user password: " nw_cabinet_password ; fi
-if [ -z "$API_server" ]; then read -t 30 -p "Enter a Nemesida WAF API server IP: " API_server ; fi
+if [ -z "$nw_api_password" ]; then read -t 30 -p "Enter a nw_api user password: " nw_api_password ; read -t 30 -p "Retype password: " confirm_nw_api_password ; fi
+if [[ $nw_api_password != $confirm_nw_api_password ]]; then echo -e "\033[0;101mPassword doesn't match\033[0m"; exit 1; fi
+
+if [ -z "$nw_cabinet_password" ]; then read -t 30 -p "Enter a nw_cabinet user password: " nw_cabinet_password ; read -t 30 -p "Retype password: " confirm_nw_cabinet_password ; fi
+if [[ $nw_cabinet_password != $confirm_nw_cabinet_password ]]; then echo -e "\033[0;101mPassword doesn't match\033[0m"; exit 1; fi
+
+if [ -z "$API_server" ]; then read -t 30 -p "Enter a Nemesida WAF API server IP: " API_server ; read -t 30 -p "Retype IP: " confirm_API_server ; fi
+if [[ $API_server != $confirm_API_server ]]; then echo -e "\033[0;101mIP doesn't match\033[0m"; exit 1; fi
 
 ## OS detection
 os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=")
@@ -81,5 +86,3 @@ su - postgres -c "psql -c \"ALTER ROLE nw_cabinet WITH LOGIN;\""
 su - postgres -c "psql cabinet -c \"GRANT ALL ON ALL TABLES IN SCHEMA public TO nw_cabinet;\""
 su - postgres -c "psql cabinet -c \"GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO nw_cabinet;\""
 su - postgres -c "psql cabinet -c \"GRANT CREATE ON SCHEMA public TO nw_cabinet;\""
-
-
