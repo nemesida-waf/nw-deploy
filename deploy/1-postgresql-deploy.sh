@@ -11,37 +11,37 @@ for i in "$@"; do
       nw_cabinet_password="${i#*=}"
       shift
       ;;
-    -API_server=*)
-      API_server="${i#*=}"
+    -nw_api_ip=*)
+      nw_api_ip="${i#*=}"
       shift
-      ;;
-    -*|--*)
-      echo "Unknown option $i"
-      exit 1
       ;;
     *)
       ;;
   esac
 done
 
-if [ -z "$nw_api_password" ]; then read -t 30 -p "Enter a nw_api user password: " nw_api_password ; read -t 30 -p "Retype password: " confirm_nw_api_password ; fi
-if [[ $nw_api_password != $confirm_nw_api_password ]]; then echo -e "\033[0;101mPassword doesn't match\033[0m"; exit 1; fi
+if [ -z "$nw_api_password" ]; then echo -e "\033[0;101mERROR: nw_api_password parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$nw_cabinet_password" ]; then echo "\033[0;101mERROR: nw_cabinet_password parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$nw_api_ip" ]; then echo "\033[0;101mERROR: nw_api_ip parameter is missing\033[0m" ; exit 1 ; fi
 
-if [ -z "$nw_cabinet_password" ]; then read -t 30 -p "Enter a nw_cabinet user password: " nw_cabinet_password ; read -t 30 -p "Retype password: " confirm_nw_cabinet_password ; fi
-if [[ $nw_cabinet_password != $confirm_nw_cabinet_password ]]; then echo -e "\033[0;101mPassword doesn't match\033[0m"; exit 1; fi
+echo -e "Database password for user nw_api: $nw_api_password"
+echo -e "Database password for user nw_cabinet: $nw_cabinet_password"
+echo -e "Nemesida WAF API server: $nw_api_ip"
 
-if [ -z "$API_server" ]; then read -t 30 -p "Enter a Nemesida WAF API server IP: " API_server ; read -t 30 -p "Retype IP: " confirm_API_server ; fi
-if [[ $API_server != $confirm_API_server ]]; then echo -e "\033[0;101mIP doesn't match\033[0m"; exit 1; fi
+while [ "$continue" != "y" ]
+do
+  read -p "Continue? [Y/N]: " continue
+done
 
-## OS detection
-os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=")
-postgres_version=$(dpkg -l | grep -E 'postgres' | head -n 1 | awk '{print $3}' | cut -b 1-2)
+## Environment
+os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d '"')
+postgres_version=$(ls /usr/lib/postgresql/ | grep -P '^\d+$' | sort -n | tail -1)
 
 ## Update
 if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
 then
   (apt-get update -qq && apt-get upgrade -qqy) || (echo -e "\033[0;101mAn error occured while update system\033[0m"; exit 1)
-elif [[ "$os_base" == "centos"  || "$os_base" == "red hat" ]]
+elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]] || (echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"; exit 1)
 then
   setenforce 0 > /dev/null 2>&1
   echo -e "SELINUX=disabled\nSELINUXTYPE=targeted" > /etc/selinux/config
@@ -53,7 +53,7 @@ if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
 then
   (apt-get install postgresql -qqy) ||  (echo -e "\033[0;101mAn error occured while installing PostgreSQL\033[0m"; exit 1)
   sed -i "/# IPv4 local connections:/ a \host all all $API_server md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
-elif [[ "$os_base" == "centos"  || "$os_base" == "red hat" ]]
+elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]] || (echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"; exit 1)
 then
   (dnf install postgresql-devel postgresql-server -qqy) || (echo -e "\033[0;101mAn error occured while installing PostgreSQL\033[0m"; exit 1)
   (postgresql-setup initdb) || (echo -e "\033[0;101mAn error occurred while initializing PostgreSQL\033[0m"; exit 1)
