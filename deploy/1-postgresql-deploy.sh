@@ -37,6 +37,15 @@ done
 os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d '"')
 postgres_version=$(ls /usr/lib/postgresql/ | grep -P '^\d+$' | sort -n | tail -1)
 
+## Delete duplicate parameters
+if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
+then
+  sed -i "/host all all $nw_api_ip md5/d" /etc/postgresql/$postgres_version/main/pg_hba.conf
+elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]] || (echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"; exit 1)
+then
+  sed -i "/host all all $nw_api_ip md5/d" /var/lib/pgsql/data/pg_hba.conf
+fi
+
 ## Update
 if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
 then
