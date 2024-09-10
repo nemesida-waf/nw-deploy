@@ -21,8 +21,8 @@ for i in "$@"; do
 done
 
 if [ -z "$nw_api_password" ]; then echo -e "\033[0;101mERROR: nw_api_password parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$nw_cabinet_password" ]; then echo "\033[0;101mERROR: nw_cabinet_password parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$nw_api_ip" ]; then echo "\033[0;101mERROR: nw_api_ip parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$nw_cabinet_password" ]; then echo -e "\033[0;101mERROR: nw_cabinet_password parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$nw_api_ip" ]; then echo -e "\033[0;101mERROR: nw_api_ip parameter is missing\033[0m" ; exit 1 ; fi
 
 echo -e "Database password for user nw_api: $nw_api_password"
 echo -e "Database password for user nw_cabinet: $nw_cabinet_password"
