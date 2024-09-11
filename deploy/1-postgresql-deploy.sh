@@ -1,6 +1,16 @@
 #!/bin/bash
 
-## Environment detection
+## OS detection
+os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d '"')
+
+## Check for supported OS
+if ! [[ "$os_base" =~ debian|ubuntu|rhel|centos|rocky ]]
+then
+  echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"
+  exit 1
+fi
+
+## Processing the params
 for i in "$@"; do
   case $i in
     -nw_api_password=*)
@@ -20,59 +30,49 @@ for i in "$@"; do
   esac
 done
 
-## Validating the use of parameters
+## Parameters validation
 if [ -z "$nw_api_password" ]; then echo -e "\033[0;101mERROR: nw_api_password parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$nw_cabinet_password" ]; then echo -e "\033[0;101mERROR: nw_cabinet_password parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$nw_api_ip" ]; then echo -e "\033[0;101mERROR: nw_api_ip parameter is missing\033[0m" ; exit 1 ; fi
 
-## Viewing the applied parameters
-echo -e "Database password for user nw_api: $nw_api_password"
-echo -e "Database password for user nw_cabinet: $nw_cabinet_password"
-echo -e "Nemesida WAF API server: $nw_api_ip"
+## Display the applied parameters
+echo "Database password for user nw_api: $nw_api_password"
+echo "Database password for user nw_cabinet: $nw_cabinet_password"
+echo "Nemesida WAF API IP: $nw_api_ip"
 
-## Confirmation of accuracy
+## Parameters confirmation
 while [ "$ask" != "y" ]
 do
   read -p "Continue? [y/n]: " ask
   ask=$(echo $ask | tr '[:upper:]' '[:lower:]')
 done
 
-echo "Update system..."
-
-## OS detection
-os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d '"')
-
-if ! [[ "$os_base" =~ "debian"|"ubuntu"|"centos"|"rocky" ]];
-then
-  echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"; exit 1
-fi
-
 ##
-# Update system
+# System update
 ##
 
-if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
+echo "System update"
+
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
   (apt-get update -qq && apt-get upgrade -qqy) || (echo -e "\033[0;101mERROR: update system is failed\033[0m"; exit 1)
-elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]]
+elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   setenforce 0
   echo -e "SELINUX=disabled\nSELINUXTYPE=targeted" > /etc/selinux/config
   (dnf update -qqy) || (echo -e "\033[0;101mERROR: update system is failed\033[0m"; exit 1)
 fi
 
-echo -e "Update system: \033[0;32mOK\033[0m"
-
 ##
-# Configure PostgreSQL
+# PostgreSQL
 ##
 
-echo "Configure PostgreSQL..."
+echo "Setting up PostgreSQL"
 
-if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
   (apt-get install postgresql -qqy) ||  (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
-elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]]
+elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   (dnf install postgresql-devel postgresql-server -qqy) || (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
   (postgresql-setup initdb) || (echo -e "\033[0;101mERROR: PostgreSQL initialization is failed\033[0m"; exit 1)
@@ -81,10 +81,10 @@ fi
 postgres_version=$(ls /usr/lib/postgresql/ | grep -P '^\d+$' | sort -n | tail -1)
 sleep 10
 
-if [[ "$os_base" == "debian"  || "$os_base" == "ubuntu" ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
   cat /etc/postgresql/$postgres_version/main/pg_hba.conf | grep -q "host all all $nw_api_ip/32 md5" || sed -i "/# IPv4 local connections:/a host all all $nw_api_ip/32 md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
-elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]]
+elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   sed -i -r 's|host\s+all\s+all\s+127.0.0.1/32\s+ident|host all all 127.0.0.1/32 md5|' /var/lib/pgsql/data/pg_hba.conf
   sed -i -r 's|host\s+all\s+all\s+::1/128\s+ident|host all all ::1/128 md5|' /var/lib/pgsql/data/pg_hba.conf
@@ -95,13 +95,11 @@ systemctl reenable postgresql
 systemctl start postgresql
 (netstat -lnp | grep -q ':5432') || (echo -e "\033[0;101mERROR: start PostgreSQL is failed\033[0m"; exit 1)
 
-echo -e "Configure PostgreSQL: \033[0;32mOK\033[0m"
-
 ##
-# Create databases
+# Create the databases
 ##
 
-echo "Create database..."
+echo "Creating databases"
 
 su - postgres -c "psql -c \"CREATE DATABASE waf;\""
 su - postgres -c "psql -c \"CREATE ROLE nw_api PASSWORD '$nw_api_password';\""
@@ -120,6 +118,3 @@ su - postgres -c "psql -c \"ALTER ROLE nw_cabinet WITH LOGIN;\""
 su - postgres -c "psql cabinet -c \"GRANT ALL ON ALL TABLES IN SCHEMA public TO nw_cabinet;\""
 su - postgres -c "psql cabinet -c \"GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO nw_cabinet;\""
 su - postgres -c "psql cabinet -c \"GRANT CREATE ON SCHEMA public TO nw_cabinet;\""
-
-echo -e "Create database: \033[0;32mOK\033[0m"
-
