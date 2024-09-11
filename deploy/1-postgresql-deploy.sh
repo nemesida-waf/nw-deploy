@@ -34,6 +34,7 @@ echo -e "Nemesida WAF API server: $nw_api_ip"
 while [ "$ask" != "y" ]
 do
   read -p "Continue? [y/n]: " ask
+  ask=$(echo $ask | tr '[:upper:]' '[:lower:]')
 done
 
 echo "Update system..."
@@ -91,6 +92,7 @@ then
 fi
 
 systemctl reenable postgresql
+systemctl start postgresql
 (netstat -lnp | grep -q ':5432') || (echo -e "\033[0;101mERROR: start PostgreSQL is failed\033[0m"; exit 1)
 
 echo -e "Configure PostgreSQL: \033[0;32mOK\033[0m"
