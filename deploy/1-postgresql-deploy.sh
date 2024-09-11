@@ -85,10 +85,8 @@ then
   cat /etc/postgresql/$postgres_version/main/pg_hba.conf | grep -q "host all all $nw_api_ip md5" || sed -i "/# IPv4 local connections:/ a \host all all $nw_api_ip md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
 elif [[ "$os_base" == "centos"  || "$os_base" == "rocky" ]]
 then
-  sed -i "/host all all $nw_api_ip md5/d" /var/lib/pgsql/data/pg_hba.conf
   sed -i -r 's|host\s+all\s+all\s+127.0.0.1/32\s+ident|host all all 127.0.0.1/32 md5|' /var/lib/pgsql/data/pg_hba.conf
   sed -i -r 's|host\s+all\s+all\s+::1/128\s+ident|host all all ::1/128 md5|' /var/lib/pgsql/data/pg_hba.conf
-  sed -i "/# IPv4 local connections:/ a \host all all $nw_api_ip md5" /var/lib/pgsql/data/pg_hba.conf
   cat /var/lib/pgsql/data/pg_hba.conf | grep -q "host all all $nw_api_ip md5" || sed -i "/# IPv4 local connections:/ a \host all all $nw_api_ip md5" /var/lib/pgsql/data/pg_hba.conf
 fi
 
