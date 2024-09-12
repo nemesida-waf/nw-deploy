@@ -1,5 +1,10 @@
 #!/bin/bash
 
+##
+# Example of use:
+# /bin/bash ./1-postgresql-deploy.sh 'pg_api_pwd=xxx pg_cabinet_pwd=xxx api_srv_ip=x.x.x.x'
+##
+
 ## OS detection
 os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d '"')
 
@@ -13,16 +18,16 @@ fi
 ## Processing the params
 for i in "$@"; do
   case $i in
-    -nw_api_password=*)
-      nw_api_password="${i#*=}"
+    pg_api_pwd=*)
+      pg_api_pwd="${i#*=}"
       shift
       ;;
-    -nw_cabinet_password=*)
-      nw_cabinet_password="${i#*=}"
+    pg_cabinet_pwd=*)
+      pg_cabinet_pwd="${i#*=}"
       shift
       ;;
-    -nw_api_ip=*)
-      nw_api_ip="${i#*=}"
+    api_srv_ip=*)
+      api_srv_ip="${i#*=}"
       shift
       ;;
     *)
@@ -31,14 +36,14 @@ for i in "$@"; do
 done
 
 ## Parameters validation
-if [ -z "$nw_api_password" ]; then echo -e "\033[0;101mERROR: nw_api_password parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$nw_cabinet_password" ]; then echo -e "\033[0;101mERROR: nw_cabinet_password parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$nw_api_ip" ]; then echo -e "\033[0;101mERROR: nw_api_ip parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$pg_api_pwd" ]; then echo -e "\033[0;101mERROR: pg_api_pwd parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$pg_cabinet_pwd" ]; then echo -e "\033[0;101mERROR: pg_cabinet_pwd parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$api_srv_ip" ]; then echo -e "\033[0;101mERROR: api_srv_ip parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
-echo "Database password for user nw_api: $nw_api_password"
-echo "Database password for user nw_cabinet: $nw_cabinet_password"
-echo "Nemesida WAF API IP: $nw_api_ip"
+echo "Database password for user nw_api: $pg_api_pwd"
+echo "Database password for user nw_cabinet: $pg_cabinet_pwd"
+echo "Nemesida WAF API IP: $api_srv_ip"
 
 ## Parameters confirmation
 while [ "$ask" != "y" ]
@@ -83,12 +88,12 @@ sleep 10
 
 if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  cat /etc/postgresql/$postgres_version/main/pg_hba.conf | grep -q "host all all $nw_api_ip/32 md5" || sed -i "/# IPv4 local connections:/a host all all $nw_api_ip/32 md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
+  cat /etc/postgresql/$postgres_version/main/pg_hba.conf | grep -q "host all all $api_srv_ip/32 md5" || sed -i "/# IPv4 local connections:/a host all all $api_srv_ip/32 md5" /etc/postgresql/$postgres_version/main/pg_hba.conf
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   sed -i -r 's|host\s+all\s+all\s+127.0.0.1/32\s+ident|host all all 127.0.0.1/32 md5|' /var/lib/pgsql/data/pg_hba.conf
   sed -i -r 's|host\s+all\s+all\s+::1/128\s+ident|host all all ::1/128 md5|' /var/lib/pgsql/data/pg_hba.conf
-  cat /var/lib/pgsql/data/pg_hba.conf | grep -q "host all all $nw_api_ip/32 md5" || sed -i "/# IPv4 local connections:/a host all all $nw_api_ip/32 md5" /var/lib/pgsql/data/pg_hba.conf
+  cat /var/lib/pgsql/data/pg_hba.conf | grep -q "host all all $api_srv_ip/32 md5" || sed -i "/# IPv4 local connections:/a host all all $api_srv_ip/32 md5" /var/lib/pgsql/data/pg_hba.conf
 fi
 
 systemctl reenable postgresql
@@ -102,7 +107,7 @@ systemctl start postgresql
 echo "Creating databases"
 
 su - postgres -c "psql -c \"CREATE DATABASE waf;\""
-su - postgres -c "psql -c \"CREATE ROLE nw_api PASSWORD '$nw_api_password';\""
+su - postgres -c "psql -c \"CREATE ROLE nw_api PASSWORD '$pg_api_pwd';\""
 su - postgres -c "psql -c \"GRANT ALL ON DATABASE waf TO nw_api;\""
 su - postgres -c "psql -c \"ALTER ROLE nw_api WITH LOGIN;\""
 su - postgres -c "psql waf -c \"GRANT ALL ON ALL TABLES IN SCHEMA public TO nw_api;\""
@@ -112,7 +117,7 @@ su - postgres -c "psql waf -c \"GRANT CREATE ON SCHEMA public TO nw_api;\""
 #
 
 su - postgres -c "psql -c \"CREATE DATABASE cabinet;\""
-su - postgres -c "psql -c \"CREATE ROLE nw_cabinet PASSWORD '$nw_cabinet_password';\""
+su - postgres -c "psql -c \"CREATE ROLE nw_cabinet PASSWORD '$pg_cabinet_pwd';\""
 su - postgres -c "psql -c \"GRANT ALL ON DATABASE cabinet TO nw_cabinet;\""
 su - postgres -c "psql -c \"ALTER ROLE nw_cabinet WITH LOGIN;\""
 su - postgres -c "psql cabinet -c \"GRANT ALL ON ALL TABLES IN SCHEMA public TO nw_cabinet;\""
