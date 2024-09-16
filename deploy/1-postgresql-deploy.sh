@@ -76,10 +76,10 @@ echo "Setting up PostgreSQL"
 
 if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  (apt-get install postgresql -qqy) ||  (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
+  (apt-get install -qqy postgresql) ||  (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
-  (dnf install postgresql-devel postgresql-server -qqy) || (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
+  (dnf install -qqy postgresql-devel postgresql-server) || (echo -e "\033[0;101mERROR: install PostgreSQL is failed\033[0m"; exit 1)
   (postgresql-setup initdb) || (echo -e "\033[0;101mERROR: PostgreSQL initialization is failed\033[0m"; exit 1)
 fi
 
