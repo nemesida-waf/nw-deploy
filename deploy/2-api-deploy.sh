@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./2-api-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'api_proxy=xxx:xx'
+# /bin/bash ./1-api-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'api_proxy=xxx:xx'
 ##
 
 ## OS detection
@@ -66,13 +66,21 @@ echo "Add Nemesida WAF repository"
 
 if [[ "$os_base" == debian ]]
 then
+  apt-get update -qqy
   apt-get install apt-transport-https gnupg2 curl -qqy
-  echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
+  if [[ "$os_code_name" == bullseye ]]
+  then
+    echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
+  elif [[ "$os_code_name" == bookworm ]]
+  then
+    echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
+  fi
   curl -s https://nemesida-security.com/repo/nw/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
   chmod 644 /etc/apt/trusted.gpg.d/trusted.gpg
   apt-get update -qqy
 elif [[ "$os_base" == ubuntu ]]
 then
+  apt-get update -qqy
   apt-get install apt-transport-https gnupg2 curl -qqy
   if [[ "$os_code_name" =~ focal|jammy ]]
   then
