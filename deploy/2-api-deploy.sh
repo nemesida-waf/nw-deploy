@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./1-api-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'api_proxy=xxx:xx'
+# /bin/bash ./2-api-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'api_proxy=xxx:xx'
 ##
 
 ## OS detection
