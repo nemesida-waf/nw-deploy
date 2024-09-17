@@ -84,7 +84,7 @@ echo "Add Nemesida WAF repository"
 if [[ "$os_base" == debian ]]
 then
   apt-get update -qqy
-  apt-get install apt-transport-https gnupg2 curl -qqy
+  apt-get install -qqy apt-transport-https gnupg2 curl
   if [[ "$os_code_name" == bullseye ]]
   then
     echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
@@ -98,7 +98,7 @@ then
 elif [[ "$os_base" == ubuntu ]]
 then
   apt-get update -qqy
-  apt-get install apt-transport-https gnupg2 curl -qqy
+  apt-get install -qqy apt-transport-https gnupg2 curl
   if [[ "$os_code_name" =~ focal|jammy ]]
   then
     echo "deb [arch=amd64] https://nemesida-security.com/repo/nw/ubuntu $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
@@ -112,7 +112,7 @@ then
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   echo -e "[NemesidaWAF]\nname=Nemesida WAF Packages for RHEL\nbaseurl=https://nemesida-security.com/repo/nw/rhel/\$releasever/\$basearch/\ngpgkey=https://nemesida-security.com/repo/nw/gpg.key\nenabled=1\ngpgcheck=1" > /etc/yum.repos.d/NemesidaWAF.repo
-  dnf install epel-release -qqy
+  dnf install -qqy epel-release
   dnf update -qqy
 fi
 
@@ -140,30 +140,30 @@ echo "Setting up Nemesida WAF Cabinet"
 
 if [[ "$os_base" == debian ]]
 then
-  apt-get install nginx python3 python3-venv python3-dev python3-reportbug python3-pip memcached libmemcached-dev postgresql-server-dev-all gettext libpcre3-dev pkg-config libcairo2-dev -qqy
-  apt-get install nwaf-cabinet -qqy
+  apt-get install -qqy nginx python3 python3-venv python3-dev python3-reportbug python3-pip memcached libmemcached-dev postgresql-server-dev-all gettext libpcre3-dev pkg-config libcairo2-dev
+  apt-get install -qqy nwaf-cabinet
 elif [[ "$os_base" == ubuntu ]]
 then
   if [[ "$os_code_name" == focal ]]
   then
-    apt-get install nginx python3.9 python3.9-venv build-essential python3.9-dev python3.9-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-dev -qqy
+    apt-get install -qqy nginx python3.9 python3.9-venv build-essential python3.9-dev python3.9-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-de
   elif [[ "$os_code_name" =~ jammy|noble ]]
   then
-    apt-get install nginx python3 python3-venv build-essential python3-dev python3-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-dev -qqy
+    apt-get install -qqy nginx python3 python3-venv build-essential python3-dev python3-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-dev
   fi
-  apt-get install nwaf-cabinet -qqy
+  apt-get install -qqy nwaf-cabinet
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
-  dnf install epel-release -qqy
+  dnf install -qqy epel-release
   dnf update -qqy
   if [[ "$os_version" == 8 ]]
   then
-    dnf install nginx python39 python39-devel python39-setuptools python39-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel -qqy
+    dnf install -qqy nginx python39 python39-devel python39-setuptools python39-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
   elif [[ "$os_version" == 9 ]]
   then
-    dnf install nginx python3 python3-devel python3-setuptools python3-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel -qqy
+    dnf install -qqy nginx python3 python3-devel python3-setuptools python3-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
   fi
-  dnf install nwaf-cabinet -qqy
+  dnf install -qqy nwaf-cabinet
 fi
 
 ## Configure Nemesida WAF Cabinet settings file
