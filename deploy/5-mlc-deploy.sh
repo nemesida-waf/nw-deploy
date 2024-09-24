@@ -164,11 +164,12 @@ then
   dnf update -qqy
   rpm --import -qqy $rabbitmq_asc_url
   dnf install -qqy socat logrotate
-  curl -O $rabbitmq_rpm_url
-  dnf install -qqy $rabbitmq_rpm_name
+  curl -O /tmp/$rabbitmq_rpm_url
+  dnf install -qqy /tmp/$rabbitmq_rpm_name
   systemctl reenable rabbitmq-server
   systemctl restart rabbitmq-server
   (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
+  rm /tmp/$rabbitmq_rpm_name
   if [[ "$os_version" == 8 ]]
   then
     dnf update -qqy
@@ -189,8 +190,8 @@ fi
 sed -i "s|nwaf_license_key = |nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
 sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
 sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
-sed -r "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
-sed -r "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $dyn_rmq_user:$dyn_rmq_pwd@$dyn_srv_ip|" /opt/mlc/mlc.conf
+sed -i "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
+sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $dyn_rmq_user:$dyn_rmq_pwd@$dyn_srv_ip|" /opt/mlc/mlc.conf
 
 ## Start Nemesida AI MLC service
 systemctl restart mlc_main rabbitmq-server memcached
