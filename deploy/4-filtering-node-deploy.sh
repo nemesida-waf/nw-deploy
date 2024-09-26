@@ -54,6 +54,9 @@ if [ -z "$api_srv_ip" ]; then echo -e "\033[0;101mERROR: api_srv_ip parameter is
 if [ -z "$rmq_user" ]; then echo -e "\033[0;101mERROR: rmq_user parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_pwd" ]; then echo -e "\033[0;101mERROR: rmq_pwd parameter is missing\033[0m" ; exit 1 ; fi
 
+if [ -z "$sys_proxy" ]; then sys_proxy=none; fi
+if [ -z "$api_proxy" ]; then api_proxy=none; fi
+
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API server IP: $api_srv_ip"
@@ -226,7 +229,7 @@ sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is 
 
 ## Configure Nemesida WAF settings file
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
+sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy none $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_proxy none|nwaf_api_proxy $api_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=http://$api_srv_ip:8080/nw-api/|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|user=guest|user=$rmq_user|" /etc/nginx/nwaf/conf/global/nwaf.conf
