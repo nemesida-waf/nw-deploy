@@ -153,13 +153,13 @@ if [[ "$os_base" =~ debian|ubuntu ]]
 then
   apt-get update -qqy
   apt-get install -qqy nginx
+  nginx_version=$(dpkg -l | grep nginx | awk '{print $3}' | cut -c 1-4 | sort -u)
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf update -qqy
   dnf install -qqy nginx
+  nginx_version=$(rpm -q nginx | cut -c 7-10)
 fi
-
-nginx_version=$(dpkg -l | grep nginx | awk '{print $3}' | cut -c 1-4 | sort -u)
 
 ##
 # Nemesida WAF Filtering node
@@ -194,7 +194,7 @@ elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf install -qqy epel-release
   dnf update -qqy
-  rpm --import -qqy $rabbitmq_asc_url
+  rpm --import $rabbitmq_asc_url
   dnf install -qqy socat logrotate
   curl -L $rabbitmq_rpm_url -o /tmp/$rabbitmq_rpm_name
   dnf install -qqy /tmp/$rabbitmq_rpm_name
