@@ -76,7 +76,7 @@ do
 done
 
 ##
-# Nemesida WAF repository
+# Connect the repository
 ##
 
 echo "Add Nemesida WAF repository"
@@ -117,7 +117,7 @@ then
 fi
 
 ##
-# System update
+# Update the system
 ##
 
 echo "System update"
@@ -133,7 +133,7 @@ then
 fi
 
 ##
-# Nemesida AI MLC
+# Install the packages
 ##
 
 echo "Setting up Nemesida AI MLC"
@@ -186,12 +186,12 @@ then
   dnf install -qqy nwaf-mlc
 fi
 
-## Configure Nemesida AI MLC settings file
+## Update the settings
 sed -i "s|nwaf_license_key =|nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
 sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
 sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
 sed -i "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
 sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $dyn_rmq_user:$dyn_rmq_pwd@$dyn_srv_ip|" /opt/mlc/mlc.conf
 
-## Start Nemesida AI MLC service
+## Restart the services
 systemctl restart mlc_main rabbitmq-server memcached

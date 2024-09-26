@@ -73,7 +73,7 @@ do
 done
 
 ##
-# Nemesida WAF and Web server repository
+# Connect the repository
 ##
 
 echo "Add Nginx web server repository"
@@ -128,7 +128,7 @@ then
 fi
 
 ##
-# System update
+# Update the system
 ##
 
 echo "System update"
@@ -162,7 +162,7 @@ then
 fi
 
 ##
-# Nemesida WAF Filtering node
+# Install the packages
 ##
 
 echo "Setting up Nemesida WAF Filtering node"
@@ -218,16 +218,16 @@ then
   dnf install -qqy nwaf-dyn-$nginx_version
 fi
 
-## Create RabbitMQ user
+## Configure the RabbitMQ
 rabbitmqctl add_user $rmq_user $rmq_pwd
 rabbitmqctl set_user_tags $rmq_user administrator
 rabbitmqctl set_permissions -p / $rmq_user ".*" ".*" ".*"
 
-## Activate Nemesida WAF dynamic module
+## Enable the dynamic module
 sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
 sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
 
-## Configure Nemesida WAF settings file
+## Update the settings
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_proxy none|nwaf_api_proxy $api_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
@@ -235,5 +235,5 @@ sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=http://$api_srv_ip:8080/nw-
 sed -i "s|user=guest|user=$rmq_user|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|password=guest|password=$rmq_pwd|" /etc/nginx/nwaf/conf/global/nwaf.conf
 
-## Start Nemesida WAF service
+## Restart the services
 systemctl restart nginx rabbitmq-server memcached nwaf_update mla_main api_firewall

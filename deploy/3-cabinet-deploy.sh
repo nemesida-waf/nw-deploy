@@ -76,7 +76,7 @@ do
 done
 
 ##
-# Nemesida WAF repository
+# Connect the repository
 ##
 
 echo "Add Nemesida WAF repository"
@@ -117,7 +117,7 @@ then
 fi
 
 ##
-# System update
+# Update the system
 ##
 
 echo "System update"
@@ -133,7 +133,7 @@ then
 fi
 
 ##
-# Nemesida WAF API
+# Install the packages
 ##
 
 echo "Setting up Nemesida WAF Cabinet"
@@ -166,7 +166,7 @@ then
   dnf install -qqy nwaf-cabinet
 fi
 
-## Configure Nemesida WAF Cabinet settings file
+## Update the settings
 sed -i "s|HTTP_PROXY_CONF = ''|HTTP_PROXY_CONF = '$proxy'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_HOST_CABINET = ''|DB_HOST_CABINET = '$pg_srv_ip'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_PORT_CABINET = ''|DB_PORT_CABINET = '$pg_srv_port'|" /var/www/app/cabinet/settings.py
@@ -179,9 +179,11 @@ sed -i "s|localhost|$api_srv_ip|g" /var/www/app/cabinet/settings.py
 ## Apply mirgation and create superuser
 cd /var/www/app/ && . venv/bin/activate && python3 manage.py check_migrations && python3 manage.py migrate && python3 manage.py createsuperuser && deactivate
 
-## Start Nemesida WAF Cabinet service
+## Start the Nginx
 mv /etc/nginx/conf.d/cabinet.conf.disabled /etc/nginx/conf.d/cabinet.conf
 nginx -t && service nginx reload
 (netstat -lnp | grep -q ':80') || (echo -e "\033[0;101mERROR: start Nemesida WAF Cabinet is failed\033[0m"; exit 1)
+
+## Restart the services
 systemctl restart nginx cabinet cabinet_ipinfo cabinet_attack_notification cabinet_cleaning_db cabinet_rule_update memcached
 

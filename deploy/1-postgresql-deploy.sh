@@ -53,7 +53,7 @@ do
 done
 
 ##
-# System update
+# Update the system
 ##
 
 echo "System update"
@@ -69,7 +69,7 @@ then
 fi
 
 ##
-# PostgreSQL
+# Install and configure PostgreSQL
 ##
 
 echo "Setting up PostgreSQL"

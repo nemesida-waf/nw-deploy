@@ -59,7 +59,7 @@ do
 done
 
 ##
-# Nemesida WAF repository
+# Connect the repository
 ##
 
 echo "Add Nemesida WAF repository"
@@ -100,7 +100,7 @@ then
 fi
 
 ##
-# System update
+# Update the system
 ##
 
 echo "System update"
@@ -116,7 +116,7 @@ then
 fi
 
 ##
-# Nemesida WAF API
+# Install the packages
 ##
 
 echo "Setting up Nemesida WAF API"
@@ -149,14 +149,16 @@ then
   dnf install -qqy nwaf-api
 fi
 
-## Configure Nemesida WAF API settings file
+## Update the settings
 sed -i "s|DB_HOST = '127.0.0.1'|DB_HOST = '$pg_srv_ip'|" /var/www/nw-api/settings.py
 sed -i "s|DB_PORT = '5432'|DB_PORT = '$pg_srv_port'|" /var/www/nw-api/settings.py
 sed -i "s|DB_PASS = ''|DB_PASS = '$pg_api_pwd'|" /var/www/nw-api/settings.py
 sed -i "s|PROXY = ''|PROXY = '$api_proxy'|" /var/www/nw-api/settings.py
 
-## Start Nemesida WAF API service
+## Start the Nginx
 mv /etc/nginx/conf.d/nwaf-api.conf.disabled /etc/nginx/conf.d/nwaf-api.conf
 nginx -t && service nginx reload
 (netstat -lnp | grep -q ':8080') || (echo -e "\033[0;101mERROR: start Nemesida WAF API is failed\033[0m"; exit 1)
+
+## Restart the services
 systemctl restart nw-api rldscupd nginx memcached
