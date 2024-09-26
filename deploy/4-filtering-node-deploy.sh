@@ -226,7 +226,7 @@ sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is 
 
 ## Configure Nemesida WAF settings file
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy none $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
+sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_proxy none|nwaf_api_proxy $api_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=http://$api_srv_ip:8080/nw-api/|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|user=guest|user=$rmq_user|" /etc/nginx/nwaf/conf/global/nwaf.conf
