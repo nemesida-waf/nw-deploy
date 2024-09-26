@@ -88,7 +88,7 @@ then
   apt-get update -qqy
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
-  echo -e "[nginx-stable]\nname=nginx stable repo\nbaseurl=http://nginx.org/packages/rhel/\$releasever/\$basearch/\ngpgkey=https://nemesida-security.com/repo/nw/gpg.key\nenabled=1\ngpgcheck=1\nmodule_hotfixes=true" > /etc/yum.repos.d/nginx.repo
+  echo -e "[nginx-stable]\nname=nginx stable repo\nbaseurl=http://nginx.org/packages/rhel/\$releasever/\$basearch/\ngpgkey=https://nginx.org/keys/nginx_signing.key\nenabled=1\ngpgcheck=1\nmodule_hotfixes=true" > /etc/yum.repos.d/nginx.repo
   dnf update -qqy
 fi
 
