@@ -162,7 +162,7 @@ elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf install -qqy epel-release
   dnf update -qqy
-  rpm --import -qqy $rabbitmq_asc_url
+  rpm --import $rabbitmq_asc_url
   dnf install -qqy socat logrotate
   curl -L $rabbitmq_rpm_url -o /tmp/$rabbitmq_rpm_name
   dnf install -qqy /tmp/$rabbitmq_rpm_name
