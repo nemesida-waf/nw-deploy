@@ -149,7 +149,7 @@ echo "Setting up web server"
 if [[ "$os_base" =~ debian|ubuntu ]]
 then
   apt-get update -qqy
-  apt-get install --qqy nginx
+  apt-get install -qqy nginx
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf update -qqy
@@ -221,7 +221,7 @@ rabbitmqctl set_user_tags $rmq_user administrator
 rabbitmqctl set_permissions -p / $rmq_user ".*" ".*" ".*"
 
 ## Activate Nemesida WAF dynamic module
-sed -i '/user  nginx;/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
+sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
 sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
 
 ## Configure Nemesida WAF settings file
