@@ -187,7 +187,7 @@ then
 fi
 
 ## Configure Nemesida AI MLC settings file
-sed -i "s|nwaf_license_key = |nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
+sed -i "s|nwaf_license_key =|nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
 sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
 sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
 sed -i "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
