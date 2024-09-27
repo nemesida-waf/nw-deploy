@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./3-cabinet-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'pg_cabinet_pwd=x.x.x.x' 'api_srv_ip=x.x.x.x' 'proxy=xxx:xx'
+# /bin/bash ./3-cabinet-deploy.sh 'pg_srv_ip=xxx' 'pg_srv_port=xxx' 'pg_api_pwd=x.x.x.x' 'pg_cabinet_pwd=x.x.x.x' 'api_srv_ip=x.x.x.x' 'proxy=xxx:xx' 'api_proxy=xxx:xx'
 ##
 
 ## OS detection
@@ -48,6 +48,10 @@ for i in "$@"; do
      proxy="${i#*=}"
       shift
       ;;
+    api_proxy=*)
+     api_proxy="${i#*=}"
+      shift
+      ;;
     *)
       ;;
   esac
@@ -67,6 +71,7 @@ echo "Database password for user nw_api: $pg_api_pwd"
 echo "Database password for user nw_cabinet: $pg_cabinet_pwd"
 echo "Nemesida WAF API IP: $api_srv_ip"
 echo "System proxy (if used): $proxy"
+echo "Nemesida WAF API proxy (if used): $api_proxy"
 
 ## Parameters confirmation
 while [ "$ask" != "y" ]
@@ -168,6 +173,7 @@ fi
 
 ## Update the settings
 sed -i "s|HTTP_PROXY_CONF = ''|HTTP_PROXY_CONF = '$proxy'|" /var/www/app/cabinet/settings.py
+sed -i "s|API_PROXY = ''|API_PROXY = '$api_proxy'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_HOST_CABINET = ''|DB_HOST_CABINET = '$pg_srv_ip'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_PORT_CABINET = ''|DB_PORT_CABINET = '$pg_srv_port'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_PASS_CABINET = ''|DB_PASS_CABINET = '$pg_cabinet_pwd'|" /var/www/app/cabinet/settings.py
