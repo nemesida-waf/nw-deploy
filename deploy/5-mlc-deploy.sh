@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./5-mlc-deploy.sh 'nwaf_lic_key=xxx' 'api_srv_ip=x.x.x.x' 'rmq_endpoints=guest:guest@1.example.com ssl://guest:guest@2.example.com:5673' 'sys_proxy=xxx:xx' 'api_proxy=xxx:xx'
+# /bin/bash ./5-mlc-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'rmq_endpoints=guest:guest@1.example.com ssl://guest:guest@2.example.com:5673' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -23,8 +23,8 @@ for i in "$@"; do
       nwaf_lic_key="${i#*=}"
       shift
       ;;
-    api_srv_ip=*)
-      api_srv_ip="${i#*=}"
+    api_url=*)
+      api_url="${i#*=}"
       shift
       ;;
     rmq_endpoints=*)
@@ -46,12 +46,12 @@ done
 
 ## Parameters validation
 if [ -z "$nwaf_lic_key" ]; then echo -e "\033[0;101mERROR: nwaf_lic_key parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$api_srv_ip" ]; then echo -e "\033[0;101mERROR: api_srv_ip parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$api_url" ]; then echo -e "\033[0;101mERROR: api_url parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_endpoints" ]; then echo -e "\033[0;101mERROR: rmq_endpoints parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
-echo "Nemesida WAF API server IP: $api_srv_ip"
+echo "Nemesida WAF API URL: $api_url"
 echo "RabbitMQ endpoints: $rmq_endpoints"
 echo "System proxy (if used): $sys_proxy"
 echo "Nemesida WAF API proxy (if used): $api_proxy"
@@ -180,7 +180,7 @@ fi
 sed -i "s|nwaf_license_key =|nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
 sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
 sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
-sed -i "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
+sed -i "s|api_uri = http://api.example.com:8080/nw-api/|api_uri = $api_url|" /opt/mlc/mlc.conf
 sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $rmq_endpoints|" /opt/mlc/mlc.conf
 
 ## Restart the services
