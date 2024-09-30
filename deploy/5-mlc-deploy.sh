@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./5-mlc-deploy.sh 'nwaf_lic_key=xxx' 'api_srv_ip=x.x.x.x' 'dyn_srv_ip=x.x.x.x' 'dyn_rmq_user=xxx' 'dyn_rmq_pwd=x.x.x.x' 'sys_proxy=xxx:xx' 'api_proxy=xxx:xx'
+# /bin/bash ./5-mlc-deploy.sh 'nwaf_lic_key=xxx' 'api_srv_ip=x.x.x.x' 'rmq_endpoints=guest:guest@1.example.com ssl://guest:guest@2.example.com:5673' 'sys_proxy=xxx:xx' 'api_proxy=xxx:xx'
 ##
 
 ## OS detection
@@ -27,16 +27,8 @@ for i in "$@"; do
       api_srv_ip="${i#*=}"
       shift
       ;;
-    dyn_srv_ip=*)
-      dyn_srv_ip="${i#*=}"
-      shift
-      ;;
-    dyn_rmq_user=*)
-      dyn_rmq_user="${i#*=}"
-      shift
-      ;;
-    dyn_rmq_pwd=*)
-      dyn_rmq_pwd="${i#*=}"
+    rmq_endpoints=*)
+      rmq_endpoints="${i#*=}"
       shift
       ;;
     sys_proxy=*)
@@ -55,16 +47,12 @@ done
 ## Parameters validation
 if [ -z "$nwaf_lic_key" ]; then echo -e "\033[0;101mERROR: nwaf_lic_key parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$api_srv_ip" ]; then echo -e "\033[0;101mERROR: api_srv_ip parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$dyn_srv_ip" ]; then echo -e "\033[0;101mERROR: dyn_srv_ip parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$dyn_rmq_user" ]; then echo -e "\033[0;101mERROR: dyn_rmq_user parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$dyn_rmq_pwd" ]; then echo -e "\033[0;101mERROR: dyn_rmq_pwd parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$rmq_endpoints" ]; then echo -e "\033[0;101mERROR: rmq_endpoints parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API server IP: $api_srv_ip"
-echo "Filtering node server IP: $dyn_srv_ip"
-echo "RabbitMQ user for connection to the filtering node: $dyn_rmq_user"
-echo "RabbitMQ password for connection to the filtering node: $dyn_rmq_pwd"
+echo "RabbitMQ endpoints: $rmq_endpoints"
 echo "System proxy (if used): $sys_proxy"
 echo "Nemesida WAF API proxy (if used): $api_proxy"
 
@@ -116,6 +104,12 @@ then
   dnf update -qqy
 fi
 
+## RabbitMQ RPM specification
+
+rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
+rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
+rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
+
 ##
 # Update the system
 ##
@@ -137,10 +131,6 @@ fi
 ##
 
 echo "Setting up Nemesida AI MLC"
-
-rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
-rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
-rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
 
 if [[ "$os_base" == debian ]]
 then
@@ -191,7 +181,7 @@ sed -i "s|nwaf_license_key =|nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.con
 sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
 sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
 sed -i "s|localhost|$api_srv_ip|" /opt/mlc/mlc.conf
-sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $dyn_rmq_user:$dyn_rmq_pwd@$dyn_srv_ip|" /opt/mlc/mlc.conf
+sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $rmq_endpoints|" /opt/mlc/mlc.conf
 
 ## Restart the services
 systemctl restart mlc_main rabbitmq-server memcached
