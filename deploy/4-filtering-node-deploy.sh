@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_srv_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
+# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -23,8 +23,8 @@ for i in "$@"; do
       nwaf_lic_key="${i#*=}"
       shift
       ;;
-    api_srv_url=*)
-      api_srv_url="${i#*=}"
+    api_url=*)
+      api_url="${i#*=}"
       shift
       ;;
     sys_proxy=*)
@@ -42,7 +42,7 @@ done
 
 ## Parameters validation
 if [ -z "$nwaf_lic_key" ]; then echo -e "\033[0;101mERROR: nwaf_lic_key parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$api_srv_url" ]; then echo -e "\033[0;101mERROR: api_srv_url parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$api_url" ]; then echo -e "\033[0;101mERROR: api_url parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_user" ]; then echo -e "\033[0;101mERROR: rmq_user parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_pwd" ]; then echo -e "\033[0;101mERROR: rmq_pwd parameter is missing\033[0m" ; exit 1 ; fi
 
@@ -51,7 +51,7 @@ if [ -z "$api_proxy" ]; then api_proxy=none; fi
 
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
-echo "Nemesida WAF API server IP: $api_srv_url"
+echo "Nemesida WAF API server URL: $api_url"
 echo "RabbitMQ user for connection to the filtering node: $rmq_user"
 echo "RabbitMQ password for connection to the filtering node: $rmq_pwd"
 echo "System proxy (if used): $sys_proxy"
@@ -119,6 +119,11 @@ then
   dnf update -qqy
 fi
 
+## RabbitMQ RPM specification
+rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
+rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
+rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
+
 ##
 # Update the system
 ##
@@ -158,10 +163,6 @@ fi
 ##
 
 echo "Setting up Nemesida WAF Filtering node"
-
-rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
-rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
-rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
 
 rm -f /etc/machine-id
 /bin/systemd-machine-id-setup
@@ -210,11 +211,6 @@ then
   dnf install -qqy nwaf-dyn-$nginx_version
 fi
 
-## Configure the RabbitMQ
-rabbitmqctl add_user $rmq_user $rmq_pwd
-rabbitmqctl set_user_tags $rmq_user administrator
-rabbitmqctl set_permissions -p / $rmq_user ".*" ".*" ".*"
-
 ## Enable the dynamic module
 sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
 sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
@@ -223,7 +219,7 @@ sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is 
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_proxy none|nwaf_api_proxy $api_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=$api_srv_url|" /etc/nginx/nwaf/conf/global/nwaf.conf
+sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=$api_url|" /etc/nginx/nwaf/conf/global/nwaf.conf
 
 ## Restart the services
 systemctl restart nginx rabbitmq-server memcached nwaf_update mla_main api_firewall
