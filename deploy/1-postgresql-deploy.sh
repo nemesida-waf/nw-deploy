@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./1-postgresql-deploy.sh 'pg_api_pwd=xxx' 'pg_cabinet_pwd=xxx' 'api_srv_ip=x.x.x.x'
+# /bin/bash ./1-postgresql-deploy.sh 'pg_api_pwd=YOUR_PASSWORD' 'pg_cabinet_pwd=YOUR_PASSWORD' 'api_srv_ip=1.1.1.1'
 ##
 
 ## OS detection
