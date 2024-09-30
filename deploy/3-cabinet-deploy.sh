@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./3-cabinet-deploy.sh 'pg_srv_ip=1.1.1.1' 'pg_srv_port=5432' 'pg_api_pwd=YOUR_PASSWORD' 'pg_cabinet_pwd=YOUR_PASSWORD' 'api_srv_url=http(s)://api.example.com:8080/nw-api/' 'proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
+# /bin/bash ./3-cabinet-deploy.sh 'pg_srv_ip=1.1.1.1' 'pg_srv_port=5432' 'pg_api_pwd=YOUR_PASSWORD' 'pg_cabinet_pwd=YOUR_PASSWORD' 'api_url=http(s)://api.example.com:8080/nw-api/' 'proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -40,8 +40,8 @@ for i in "$@"; do
       pg_cabinet_pwd="${i#*=}"
       shift
       ;;
-    api_srv_url=*)
-      api_srv_url="${i#*=}"
+    api_url=*)
+      api_url="${i#*=}"
       shift
       ;;
     proxy=*)
@@ -62,14 +62,14 @@ if [ -z "$pg_srv_ip" ]; then echo -e "\033[0;101mERROR: pg_srv_ip parameter is m
 if [ -z "$pg_srv_port" ]; then echo -e "\033[0;101mERROR: pg_srv_port parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$pg_api_pwd" ]; then echo -e "\033[0;101mERROR: pg_api_pwd parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$pg_cabinet_pwd" ]; then echo -e "\033[0;101mERROR: pg_cabinet_pwd parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$api_srv_url" ]; then echo -e "\033[0;101mERROR: api_srv_url parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$api_url" ]; then echo -e "\033[0;101mERROR: api_url parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
 echo "PostgreSQL IP: $pg_srv_ip"
 echo "PostgreSQL port: $pg_srv_port"
 echo "Database password for user nw_api: $pg_api_pwd"
 echo "Database password for user nw_cabinet: $pg_cabinet_pwd"
-echo "Nemesida WAF API IP: $api_srv_url"
+echo "Nemesida WAF API URL: $api_url"
 echo "System proxy (if used): $proxy"
 echo "Nemesida WAF API proxy (if used): $api_proxy"
 
@@ -180,7 +180,7 @@ sed -i "s|DB_PASS_CABINET = ''|DB_PASS_CABINET = '$pg_cabinet_pwd'|" /var/www/ap
 sed -i "s|DB_HOST_CONF = ''|DB_HOST_CONF = '$pg_srv_ip'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_PORT_CONF = ''|DB_PORT_CONF = '$pg_srv_port'|" /var/www/app/cabinet/settings.py
 sed -i "s|DB_PASS_CONF = ''|DB_PASS_CONF = '$pg_api_pwd'|" /var/www/app/cabinet/settings.py
-sed -i "s|API_URI = 'http://localhost:8080/nw-api/'|API_URI = '$api_srv_url'|g" /var/www/app/cabinet/settings.py
+sed -i "s|API_URI = 'http://localhost:8080/nw-api/'|API_URI = '$api_url'|g" /var/www/app/cabinet/settings.py
 
 ## Apply mirgation and create superuser
 cd /var/www/app/ && . venv/bin/activate && python3 manage.py check_migrations && python3 manage.py migrate && python3 manage.py createsuperuser && deactivate
