@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=xxx' 'api_srv_ip=x.x.x.x' 'rmq_user=xxx' 'rmq_pwd=x.x.x.x' 'sys_proxy=xxx:xx' 'api_proxy=xxx:xx'
+# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_srv_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -23,16 +23,8 @@ for i in "$@"; do
       nwaf_lic_key="${i#*=}"
       shift
       ;;
-    api_srv_ip=*)
-      api_srv_ip="${i#*=}"
-      shift
-      ;;
-    rmq_user=*)
-      rmq_user="${i#*=}"
-      shift
-      ;;
-    rmq_pwd=*)
-      rmq_pwd="${i#*=}"
+    api_srv_url=*)
+      api_srv_url="${i#*=}"
       shift
       ;;
     sys_proxy=*)
@@ -50,7 +42,7 @@ done
 
 ## Parameters validation
 if [ -z "$nwaf_lic_key" ]; then echo -e "\033[0;101mERROR: nwaf_lic_key parameter is missing\033[0m" ; exit 1 ; fi
-if [ -z "$api_srv_ip" ]; then echo -e "\033[0;101mERROR: api_srv_ip parameter is missing\033[0m" ; exit 1 ; fi
+if [ -z "$api_srv_url" ]; then echo -e "\033[0;101mERROR: api_srv_url parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_user" ]; then echo -e "\033[0;101mERROR: rmq_user parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$rmq_pwd" ]; then echo -e "\033[0;101mERROR: rmq_pwd parameter is missing\033[0m" ; exit 1 ; fi
 
@@ -59,7 +51,7 @@ if [ -z "$api_proxy" ]; then api_proxy=none; fi
 
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
-echo "Nemesida WAF API server IP: $api_srv_ip"
+echo "Nemesida WAF API server IP: $api_srv_url"
 echo "RabbitMQ user for connection to the filtering node: $rmq_user"
 echo "RabbitMQ password for connection to the filtering node: $rmq_pwd"
 echo "System proxy (if used): $sys_proxy"
@@ -231,9 +223,7 @@ sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is 
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_sys_proxy none|nwaf_sys_proxy $sys_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
 sed -i "s|nwaf_api_proxy none|nwaf_api_proxy $api_proxy|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=http://$api_srv_ip:8080/nw-api/|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|user=guest|user=$rmq_user|" /etc/nginx/nwaf/conf/global/nwaf.conf
-sed -i "s|password=guest|password=$rmq_pwd|" /etc/nginx/nwaf/conf/global/nwaf.conf
+sed -i "s|nwaf_api_conf host=none|nwaf_api_conf host=$api_srv_url|" /etc/nginx/nwaf/conf/global/nwaf.conf
 
 ## Restart the services
 systemctl restart nginx rabbitmq-server memcached nwaf_update mla_main api_firewall
