@@ -177,9 +177,9 @@ fi
 
 ## Update the settings
 sed -i "s|nwaf_license_key =|nwaf_license_key = $nwaf_lic_key|" /opt/mlc/mlc.conf
-sed -i "s|sys_proxy = |sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
-sed -i "s|api_proxy = |api_proxy = $api_proxy|" /opt/mlc/mlc.conf
-sed -i "s|api_uri = http://api.example.com:8080/nw-api/|api_uri = $api_url|" /opt/mlc/mlc.conf
+sed -i "s|sys_proxy =|sys_proxy = $sys_proxy|" /opt/mlc/mlc.conf
+sed -i "s|api_proxy =|api_proxy = $api_proxy|" /opt/mlc/mlc.conf
+sed -i "s|api_uri = http://localhost:8080/nw-api/|api_uri = $api_url|" /opt/mlc/mlc.conf
 sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $rmq_endpoints|" /opt/mlc/mlc.conf
 
 ## Restart the services
