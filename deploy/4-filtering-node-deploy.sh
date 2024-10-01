@@ -50,8 +50,6 @@ if [ -z "$api_proxy" ]; then api_proxy=none; fi
 ## Display the applied parameters
 echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API server URL: $api_url"
-echo "RabbitMQ user for connection to the filtering node: $rmq_user"
-echo "RabbitMQ password for connection to the filtering node: $rmq_pwd"
 echo "System proxy (if used): $sys_proxy"
 echo "Nemesida WAF API proxy (if used): $api_proxy"
 
