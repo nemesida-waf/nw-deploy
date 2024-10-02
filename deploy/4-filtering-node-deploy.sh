@@ -41,9 +41,9 @@ for i in "$@"; do
 done
 
 ## Parameters validation
-if [ -z "$nwaf_lic_key" ]; then echo -e "\033[0;101mERROR: nwaf_lic_key parameter is missing\033[0m" ; exit 1 ; fi
 if [ -z "$api_url" ]; then echo -e "\033[0;101mERROR: api_url parameter is missing\033[0m" ; exit 1 ; fi
 
+if [ -z "$nwaf_lic_key" ]; then nwaf_lic_key=none; fi
 if [ -z "$sys_proxy" ]; then sys_proxy=none; fi
 if [ -z "$api_proxy" ]; then api_proxy=none; fi
 
