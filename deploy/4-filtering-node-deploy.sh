@@ -207,8 +207,9 @@ then
   dnf install -qqy nwaf-dyn-$nginx_version
 fi
 
-## Enable the dynamic module
+## Enable the dynamic modules
 sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
+# sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_ws_module.so;' /etc/nginx/nginx.conf
 sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
 
 ## Update the settings
