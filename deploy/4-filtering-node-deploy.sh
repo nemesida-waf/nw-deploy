@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
+# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128' 'websocket=yes'
 ##
 
 ## OS detection
@@ -35,6 +35,10 @@ for i in "$@"; do
       api_proxy="${i#*=}"
       shift
       ;;
+    websocket=*)
+      websocket="${i#*=}"
+      shift
+      ;;
     *)
       ;;
   esac
@@ -52,6 +56,7 @@ echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API server URL: $api_url"
 echo "System proxy (if used): $sys_proxy"
 echo "Nemesida WAF API proxy (if used): $api_proxy"
+echo "Use Websocket analysis module: $websocket"
 
 ## Parameters confirmation
 while [ "$ask" != "y" ]
@@ -208,9 +213,15 @@ then
 fi
 
 ## Enable the dynamic modules
-sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
-# sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_ws_module.so;' /etc/nginx/nginx.conf
-sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
+if [[ "$websocket" == yes ]]
+then
+  sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
+  sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_ws_module.so;' /etc/nginx/nginx.conf
+  sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
+else
+  sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
+  sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
+fi
 
 ## Update the settings
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf
