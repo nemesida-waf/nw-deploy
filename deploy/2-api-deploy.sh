@@ -82,7 +82,7 @@ elif [[ "$os_base" == ubuntu ]]
 then
   apt-get update -qqy
   apt-get install -qqy apt-transport-https gnupg2 curl
-  if [[ "$os_code_name" =~ focal|jammy ]]
+  if [[ "$os_code_name" == jammy ]]
   then
     echo "deb [arch=amd64] https://nemesida-security.com/repo/nw/ubuntu $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
   elif [[ "$os_code_name" == noble ]]
@@ -127,10 +127,7 @@ then
   apt-get install -qqy nwaf-api
 elif [[ "$os_base" == ubuntu ]]
 then
-  if [[ "$os_code_name" == focal ]]
-  then
-    apt-get install -qqy nginx python3.9 python3-pip python3.9-dev postgresql-server-dev-all python3.9-venv build-essential memcached
-  elif [[ "$os_code_name" =~ jammy|noble ]]
+  if [[ "$os_code_name" =~ jammy|noble ]]
   then
     apt-get install -qqy nginx python3 python3-pip python3-dev postgresql-server-dev-all python3-venv build-essential memcached
   fi
