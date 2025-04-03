@@ -104,7 +104,7 @@ elif [[ "$os_base" == ubuntu ]]
 then
   apt-get update -qqy
   apt-get install -qqy apt-transport-https gnupg2 curl
-  if [[ "$os_code_name" =~ focal|jammy ]]
+  if [[ "$os_code_name" == jammy ]]
   then
     echo "deb [arch=amd64] https://nemesida-security.com/repo/nw/ubuntu $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
   elif [[ "$os_code_name" == noble ]]
@@ -149,10 +149,7 @@ then
   apt-get install -qqy nwaf-cabinet
 elif [[ "$os_base" == ubuntu ]]
 then
-  if [[ "$os_code_name" == focal ]]
-  then
-    apt-get install -qqy nginx python3.9 python3.9-venv build-essential python3.9-dev python3.9-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-de
-  elif [[ "$os_code_name" =~ jammy|noble ]]
+  if [[ "$os_code_name" =~ jammy|noble ]]
   then
     apt-get install -qqy nginx python3 python3-venv build-essential python3-dev python3-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-dev
   fi
@@ -192,4 +189,3 @@ nginx -t && service nginx reload
 
 ## Restart the services
 systemctl restart nginx cabinet cabinet_ipinfo cabinet_attack_notification cabinet_cleaning_db cabinet_rule_update memcached
-
