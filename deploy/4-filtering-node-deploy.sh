@@ -198,13 +198,13 @@ then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled powertools
-    dnf install -qqy python39 python39-devel python39-setuptools python39-pip systemd openssl librabbitmq libcurl-devel gcc memcached
+    dnf install -qqy python3.12 python3.12-devel python3.12-setuptools python3.12-pip systemd openssl librabbitmq libcurl-devel gcc memcached rabbitmq-server libmemcached
   elif [[ "$os_version" == 9 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled crb
-    dnf install -qqy python3 python3-devel python3-setuptools python3-pip systemd openssl librabbitmq libcurl-devel gcc memcached
+    dnf install -qqy python3.12 python3.12-devel python3.12-setuptools python3.12-pip systemd openssl librabbitmq libcurl-devel gcc memcached rabbitmq-server libmemcached
   fi
   dnf install -qqy nwaf-dyn-$nginx_version
 fi

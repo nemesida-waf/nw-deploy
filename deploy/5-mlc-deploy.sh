@@ -161,13 +161,13 @@ then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled powertools
-    dnf install -qqy python39 python39-devel python39-setuptools python39-pip gcc memcached
+    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
   elif [[ "$os_version" == 9 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled crb
-    dnf install -qqy python3 python3-devel python3-setuptools python3-pip gcc memcached
+    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
   fi
   dnf install -qqy nwaf-mlc
 fi

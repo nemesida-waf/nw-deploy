@@ -160,10 +160,10 @@ then
   dnf update -qqy
   if [[ "$os_version" == 8 ]]
   then
-    dnf install -qqy nginx python39 python39-devel python39-setuptools python39-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
+    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
   elif [[ "$os_version" == 9 ]]
   then
-    dnf install -qqy nginx python3 python3-devel python3-setuptools python3-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
+    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
   fi
   dnf install -qqy nwaf-cabinet
 fi
