@@ -104,11 +104,6 @@ then
   dnf update -qqy
 fi
 
-## RabbitMQ RPM specification
-rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
-rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
-rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
-
 ##
 # Update the system
 ##
@@ -133,29 +128,19 @@ echo "Setting up Nemesida AI MLC"
 
 if [[ "$os_base" == debian ]]
 then
-  apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev rabbitmq-server gcc memcached
-  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
+  apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev gcc memcached
   apt-get install -qqy nwaf-mlc
 elif [[ "$os_base" == ubuntu ]]
 then
   if [[ "$os_code_name" =~ jammy|noble ]]
   then
-    apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev rabbitmq-server gcc memcached
+    apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev gcc memcached
   fi
-  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
   apt-get install -qqy nwaf-mlc
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf install -qqy epel-release
   dnf update -qqy
-  rpm --import $rabbitmq_asc_url
-  dnf install -qqy socat logrotate
-  curl -L $rabbitmq_rpm_url -o /tmp/$rabbitmq_rpm_name
-  dnf install -qqy /tmp/$rabbitmq_rpm_name
-  systemctl reenable rabbitmq-server
-  systemctl restart rabbitmq-server
-  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
-  rm /tmp/$rabbitmq_rpm_name
   if [[ "$os_version" == 8 ]]
   then
     dnf update -qqy
@@ -180,4 +165,4 @@ sed -i "s|api_uri = http://localhost:8080/nw-api/|api_uri = $api_url|" /opt/mlc/
 sed -i "s|rmq_host = guest:guest@127.0.0.1|rmq_host = $rmq_endpoints|" /opt/mlc/mlc.conf
 
 ## Restart the services
-systemctl restart mlc_main rabbitmq-server memcached
+systemctl restart mlc_main memcached
