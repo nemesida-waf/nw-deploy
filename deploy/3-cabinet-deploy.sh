@@ -143,29 +143,17 @@ fi
 
 echo "Setting up Nemesida WAF Cabinet"
 
-if [[ "$os_base" == debian ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  apt-get install -qqy nginx python3 python3-venv python3-dev python3-reportbug python3-pip memcached libmemcached-dev postgresql-server-dev-all gettext libpcre3-dev pkg-config libcairo2-dev
-  apt-get install -qqy nwaf-cabinet
-elif [[ "$os_base" == ubuntu ]]
-then
-  if [[ "$os_code_name" =~ jammy|noble ]]
-  then
-    apt-get install -qqy nginx python3 python3-venv build-essential python3-dev python3-reportbug python3-pip memcached libmemcached-dev libpq-dev gettext libpcre3-dev pkg-config libcairo2-dev
-  fi
   apt-get install -qqy nwaf-cabinet
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf install -qqy epel-release
   dnf update -qqy
-  if [[ "$os_version" == 8 ]]
+  if [[ "$os_version" =~ 8|9 ]]
   then
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
-  elif [[ "$os_version" == 9 ]]
-  then
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip gcc memcached postgresql-devel gettext pcre-devel pkg-config cairo-devel
+    dnf install -qqy nwaf-cabinet
   fi
-  dnf install -qqy nwaf-cabinet
 fi
 
 ## Update the settings

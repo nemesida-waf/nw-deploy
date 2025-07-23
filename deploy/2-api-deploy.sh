@@ -121,29 +121,17 @@ fi
 
 echo "Setting up Nemesida WAF API"
 
-if [[ "$os_base" == debian ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  apt-get install -qqy nginx python3-pip python3-dev postgresql-server-dev-all python3-venv memcached
-  apt-get install -qqy nwaf-api
-elif [[ "$os_base" == ubuntu ]]
-then
-  if [[ "$os_code_name" =~ jammy|noble ]]
-  then
-    apt-get install -qqy nginx python3 python3-pip python3-dev postgresql-server-dev-all python3-venv build-essential memcached
-  fi
   apt-get install -qqy nwaf-api
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
   dnf install -qqy epel-release
   dnf update -qqy
-  if [[ "$os_version" == 8 ]]
+  if [[ "$os_version" =~ 8|9 ]]
   then
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
-  elif [[ "$os_version" == 9 ]]
-  then
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
+    dnf install -qqy nwaf-api
   fi
-  dnf install -qqy nwaf-api
 fi
 
 ## Update the settings

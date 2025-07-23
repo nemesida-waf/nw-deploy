@@ -126,16 +126,8 @@ fi
 
 echo "Setting up Nemesida AI MLC"
 
-if [[ "$os_base" == debian ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev gcc memcached
-  apt-get install -qqy nwaf-mlc
-elif [[ "$os_base" == ubuntu ]]
-then
-  if [[ "$os_code_name" =~ jammy|noble ]]
-  then
-    apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libc6-dev gcc memcached
-  fi
   apt-get install -qqy nwaf-mlc
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
@@ -146,13 +138,11 @@ then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled powertools
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
   elif [[ "$os_version" == 9 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled crb
-    dnf install -qqy nginx python3.12 python3.12-devel python3.12-setuptools python3.12-pip postgresql-devel gcc memcached
   fi
   dnf install -qqy nwaf-mlc
 fi

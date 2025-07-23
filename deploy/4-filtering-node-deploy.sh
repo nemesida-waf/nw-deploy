@@ -120,11 +120,6 @@ then
   dnf update -qqy
 fi
 
-## RabbitMQ RPM specification
-rabbitmq_asc_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $4}')
-rabbitmq_rpm_url=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}')
-rabbitmq_rpm_name=$(curl https://www.rabbitmq.com/docs/install-rpm#red-hat-8-centos-stream-8-modern-fedora-releases -A 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' | grep -E 'https://github.com/rabbitmq/rabbitmq-server/releases/download/' | awk -F '["]' '{print $2}' | awk -F [/] '{print $9}')
-
 ##
 # Update the system
 ##
@@ -160,6 +155,25 @@ then
 fi
 
 ##
+# RabbitMQ
+##
+
+if [[ "$os_base" =~ rhel|centos|rocky ]]
+then
+  version=$(rpm -E %{rhel})
+  rpm --import 'https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc'
+  rpm --import 'https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key'
+  rpm --import 'https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key'
+  curl -s -L https://raw.githubusercontent.com/nemesida-waf/nw-deploy/refs/heads/main/misc/rhel-rmq.repo -o /etc/yum.repos.d/rabbitmq.repo
+  dnf update -qqy
+  dnf install -qqy socat logrotate
+  dnf install -qqy erlang rabbitmq-server
+  systemctl reenable rabbitmq-server
+  systemctl restart rabbitmq-server
+  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
+fi
+
+##
 # Install the packages
 ##
 
@@ -168,43 +182,22 @@ echo "Setting up Nemesida WAF Filtering node"
 rm -f /etc/machine-id
 /bin/systemd-machine-id-setup
 
-if [[ "$os_base" == debian ]]
+if [[ "$os_base" =~ debian|ubuntu ]]
 then
-  apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools librabbitmq4 libcurl3-gnutls libcurl4-openssl-dev libc6-dev gcc g++ memcached rabbitmq-server
-  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
   apt-get install -qqy nwaf-dyn-$nginx_version
-elif [[ "$os_base" == ubuntu ]]
-then
-  if [[ "$os_code_name" =~ jammy|noble ]]
-  then
-    apt-get install -qqy python3 python3-venv python3-pip python3-dev python3-setuptools libcurl3-gnutls librabbitmq4 libcurl4-openssl-dev libc6-dev gcc g++ memcached rabbitmq-server
-  fi
   (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
-  apt-get install -qqy nwaf-dyn-$nginx_version
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
-  dnf install -qqy epel-release
-  dnf update -qqy
-  rpm --import $rabbitmq_asc_url
-  dnf install -qqy socat logrotate
-  curl -L $rabbitmq_rpm_url -o /tmp/$rabbitmq_rpm_name
-  dnf install -qqy /tmp/$rabbitmq_rpm_name
-  systemctl reenable rabbitmq-server
-  systemctl restart rabbitmq-server
-  (netstat -lnp | grep -q ':5672') || (echo -e "\033[0;101mERROR: start RabbitMQ server is failed\033[0m"; exit 1)
-  rm /tmp/$rabbitmq_rpm_name
   if [[ "$os_version" == 8 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled powertools
-    dnf install -qqy python3.12 python3.12-devel python3.12-setuptools python3.12-pip systemd openssl librabbitmq libcurl-devel gcc memcached rabbitmq-server libmemcached
   elif [[ "$os_version" == 9 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled crb
-    dnf install -qqy python3.12 python3.12-devel python3.12-setuptools python3.12-pip systemd openssl librabbitmq libcurl-devel gcc memcached rabbitmq-server libmemcached
   fi
   dnf install -qqy nwaf-dyn-$nginx_version
 fi
