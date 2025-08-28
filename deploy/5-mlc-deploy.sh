@@ -76,7 +76,7 @@ then
   if [[ "$os_code_name" == bullseye ]]
   then
     echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
-  elif [[ "$os_code_name" == bookworm ]]
+  elif [[ "$os_code_name" =~ bookworm|trixie ]]
   then
     echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
@@ -138,7 +138,7 @@ then
     dnf update -qqy
     dnf install -qqy epel-release
     dnf config-manager --set-enabled powertools
-  elif [[ "$os_version" == 9 ]]
+  elif [[ "$os_version" =~ 9|10 ]]
   then
     dnf update -qqy
     dnf install -qqy epel-release
