@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./5-mlc-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'rmq_endpoints=guest:guest@1.example.com ssl://guest:guest@2.example.com:5673' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
+# /bin/bash ./5-mlc-deploy.sh 'timezone=Europe/Moscow' 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'rmq_endpoints=guest:guest@1.example.com ssl://guest:guest@2.example.com:5673' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -19,6 +19,10 @@ fi
 ## Processing the params
 for i in "$@"; do
   case $i in
+    timezone=*)
+      timezone="${i#*=}"
+      shift
+      ;;
     nwaf_lic_key=*)
       nwaf_lic_key="${i#*=}"
       shift
@@ -50,6 +54,7 @@ if [ -z "$api_url" ]; then echo -e "\033[0;101mERROR: api_url parameter is missi
 if [ -z "$rmq_endpoints" ]; then echo -e "\033[0;101mERROR: rmq_endpoints parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
+echo "Time Zone: $timezone"
 echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API URL: $api_url"
 echo "RabbitMQ endpoints: $rmq_endpoints"
@@ -109,6 +114,8 @@ fi
 ##
 
 echo "System update"
+
+timedatectl set-timezone $timezone
 
 if [[ "$os_base" =~ debian|ubuntu ]]
 then

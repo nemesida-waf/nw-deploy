@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./4-filtering-node-deploy.sh 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128' 'websocket=yes' 'grpc=yes'
+# /bin/bash ./4-filtering-node-deploy.sh 'timezone=Europe/Moscow' 'nwaf_lic_key=1234567890' 'api_url=http(s)://api.example.com:8080/nw-api/' 'sys_proxy=http(s)://proxy.example.com:3128' 'api_proxy=http(s)://proxy.example.com:3128' 'websocket=yes' 'grpc=yes'
 ##
 
 ## OS detection
@@ -19,6 +19,10 @@ fi
 ## Processing the params
 for i in "$@"; do
   case $i in
+    timezone=*)
+      timezone="${i#*=}"
+      shift
+      ;;
     nwaf_lic_key=*)
       nwaf_lic_key="${i#*=}"
       shift
@@ -56,6 +60,7 @@ if [ -z "$sys_proxy" ]; then sys_proxy=none; fi
 if [ -z "$api_proxy" ]; then api_proxy=none; fi
 
 ## Display the applied parameters
+echo "Time Zone: $timezone"
 echo "Nemesida WAF license key: $nwaf_lic_key"
 echo "Nemesida WAF API server URL: $api_url"
 echo "System proxy (if used): $sys_proxy"
@@ -130,6 +135,8 @@ fi
 ##
 
 echo "System update"
+
+timedatectl set-timezone $timezone
 
 if [[ "$os_base" =~ debian|ubuntu ]]
 then

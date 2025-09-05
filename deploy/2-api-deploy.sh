@@ -2,7 +2,7 @@
 
 ##
 # Example of use:
-# /bin/bash ./2-api-deploy.sh 'pg_srv_ip=1.1.1.1' 'pg_srv_port=5432' 'pg_api_pwd=YOUR_PASSWORD' 'api_proxy=http(s)://proxy.example.com:3128'
+# /bin/bash ./2-api-deploy.sh 'timezone=Europe/Moscow' 'pg_srv_ip=1.1.1.1' 'pg_srv_port=5432' 'pg_api_pwd=YOUR_PASSWORD' 'api_proxy=http(s)://proxy.example.com:3128'
 ##
 
 ## OS detection
@@ -19,6 +19,10 @@ fi
 ## Processing the params
 for i in "$@"; do
   case $i in
+    timezone=*)
+      timezone="${i#*=}"
+      shift
+      ;;
     pg_srv_ip=*)
       pg_srv_ip="${i#*=}"
       shift
@@ -46,6 +50,7 @@ if [ -z "$pg_srv_port" ]; then echo -e "\033[0;101mERROR: pg_srv_port parameter 
 if [ -z "$pg_api_pwd" ]; then echo -e "\033[0;101mERROR: pg_api_pwd parameter is missing\033[0m" ; exit 1 ; fi
 
 ## Display the applied parameters
+echo "Time Zone: $timezone"
 echo "PostgreSQL IP: $pg_srv_ip"
 echo "PostgreSQL port: $pg_srv_port"
 echo "Database password for user nw_api: $pg_api_pwd"
@@ -104,6 +109,8 @@ fi
 ##
 
 echo "System update"
+
+timedatectl set-timezone $timezone
 
 if [[ "$os_base" =~ debian|ubuntu ]]
 then
