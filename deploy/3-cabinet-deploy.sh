@@ -10,11 +10,6 @@ os_base=$(cat /etc/os-release | grep -E '^ID=' | awk '{print $2}' FS="=" | tr -d
 os_version=$(cat /etc/os-release | grep -E '^VERSION_ID=' | awk '{print $2}' FS="=" | tr -d '"' | grep -o '^[^.]*')
 os_code_name=$(cat /etc/os-release | grep -E '^VERSION_CODENAME=' | awk '{print $2}' FS="=" | tr -d '"')
 
-## Set environment timezone
-timedatectl set-timezone Europe/Moscow
-echo 'Europe/Moscow' > /etc/timezone
-
-
 if ! [[ "$os_base" =~ debian|ubuntu|rhel|centos|rocky ]]
 then
   echo -e "\033[0;101mUnsupported operating system. Please, contact us: info@nemesida-waf.com\033[0m"
@@ -132,6 +127,7 @@ fi
 
 echo "System update"
 
+timedatectl set-ntp yes
 timedatectl set-timezone $timezone
 
 if [[ "$os_base" =~ debian|ubuntu ]]

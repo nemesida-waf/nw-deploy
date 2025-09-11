@@ -63,6 +63,7 @@ done
 
 echo "System update"
 
+timedatectl set-ntp yes
 timedatectl set-timezone $timezone
 
 if [[ "$os_base" =~ debian|ubuntu ]]
