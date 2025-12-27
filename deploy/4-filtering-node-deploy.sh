@@ -100,10 +100,7 @@ echo "Add Nemesida WAF repository"
 if [[ "$os_base" == debian ]]
 then
   apt-get update -qqy
-  if [[ "$os_code_name" == bullseye ]]
-  then
-    echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
-  elif [[ "$os_code_name" =~ bookworm|trixie ]]
+  if [[ "$os_code_name" =~ bookworm|trixie ]]
   then
     echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
@@ -220,7 +217,7 @@ if [[ "$websocket" == yes ]]; then sed -i '/load_module \/etc\/nginx\/modules\/n
 if [[ "$grpc" == yes ]]; then sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_grpc_module.so;' /etc/nginx/nginx.conf; fi
 
 ## Request body is too large fix
-sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    ## Request body is too large fix\n    client_body_buffer_size 25M;\n\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;' /etc/nginx/nginx.conf
+sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    proxy_busy_buffers_size 24k;\n    client_body_buffer_size 25M;\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;\n' /etc/nginx/nginx.conf
 
 ## Update the settings
 sed -i "s|nwaf_license_key none|nwaf_license_key $nwaf_lic_key|" /etc/nginx/nwaf/conf/global/nwaf.conf

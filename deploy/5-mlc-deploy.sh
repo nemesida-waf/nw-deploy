@@ -78,10 +78,7 @@ if [[ "$os_base" == debian ]]
 then
   apt-get update -qqy
   apt-get install -qqy apt-transport-https gnupg2 curl
-  if [[ "$os_code_name" == bullseye ]]
-  then
-    echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
-  elif [[ "$os_code_name" =~ bookworm|trixie ]]
+  if [[ "$os_code_name" =~ bookworm|trixie ]]
   then
     echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
