@@ -213,8 +213,8 @@ fi
 
 ## Enable the dynamic modules
 sed -i '/^user/i load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;' /etc/nginx/nginx.conf
-if [[ "$websocket" == yes ]]; then sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_ws_module.so;' /etc/nginx/nginx.conf; fi
 if [[ "$grpc" == yes ]]; then sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_grpc_module.so;' /etc/nginx/nginx.conf; fi
+if [[ "$websocket" == yes ]]; then sed -i '/load_module \/etc\/nginx\/modules\/ngx_http_waf_module.so;/a \load_module /etc/nginx/modules/ngx_http_waf_ws_module.so;' /etc/nginx/nginx.conf; fi
 
 ## Request body is too large fix
 sed -i '/http {/a \    ##\n    # Nemesida WAF\n    ##\n\n    proxy_busy_buffers_size 24k;\n    client_body_buffer_size 25M;\n    include \/etc\/nginx\/nwaf\/conf\/global\/*.conf;\n' /etc/nginx/nginx.conf
