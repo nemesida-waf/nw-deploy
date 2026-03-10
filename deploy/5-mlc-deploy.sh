@@ -80,9 +80,9 @@ then
   apt-get install -qqy apt-transport-https gnupg2 curl
   if [[ "$os_code_name" =~ bookworm|trixie ]]
   then
-    echo "deb https://nemesida-security.com/repo/nw/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
+    echo "deb https://repo.s.nemesida-waf.ru/debian $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
-  curl -s https://nemesida-security.com/repo/nw/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
+  curl -s https://repo.s.nemesida-waf.ru/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
   chmod 644 /etc/apt/trusted.gpg.d/trusted.gpg
   apt-get update -qqy
 elif [[ "$os_base" == ubuntu ]]
@@ -91,17 +91,17 @@ then
   apt-get install -qqy apt-transport-https gnupg2 curl
   if [[ "$os_code_name" == jammy ]]
   then
-    echo "deb [arch=amd64] https://nemesida-security.com/repo/nw/ubuntu $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
+    echo "deb [arch=amd64] https://repo.s.nemesida-waf.ru/ubuntu $os_code_name non-free" > /etc/apt/sources.list.d/NemesidaWAF.list
   elif [[ "$os_code_name" == noble ]]
   then
-    echo "deb [arch=amd64] https://nemesida-security.com/repo/nw/ubuntu $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
+    echo "deb [arch=amd64] https://repo.s.nemesida-waf.ru/ubuntu $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
-  curl -s https://nemesida-security.com/repo/nw/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
+  curl -s https://repo.s.nemesida-waf.ru/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
   chmod 644 /etc/apt/trusted.gpg.d/trusted.gpg
   apt-get update -qqy
 elif [[ "$os_base" =~ rhel|centos|rocky ]]
 then
-  echo -e "[NemesidaWAF]\nname=Nemesida WAF Packages for RHEL\nbaseurl=https://nemesida-security.com/repo/nw/rhel/\$releasever/\$basearch/\ngpgkey=https://nemesida-security.com/repo/nw/gpg.key\nenabled=1\ngpgcheck=1" > /etc/yum.repos.d/NemesidaWAF.repo
+  echo -e "[NemesidaWAF]\nname=Nemesida WAF Packages for RHEL\nbaseurl=https://repo.s.nemesida-waf.ru/rhel/\$releasever/\$basearch/\ngpgkey=https://repo.s.nemesida-waf.ru/gpg.key\nenabled=1\ngpgcheck=1" > /etc/yum.repos.d/NemesidaWAF.repo
   dnf install -qqy epel-release
   dnf update -qqy
 fi
