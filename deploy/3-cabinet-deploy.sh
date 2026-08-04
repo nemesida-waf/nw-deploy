@@ -107,6 +107,9 @@ then
   elif [[ "$os_code_name" == noble ]]
   then
     echo "deb [arch=amd64] https://repo.s.nemesida-waf.ru/ubuntu $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
+  elif [[ "$os_code_name" == resolute ]]
+  then
+    echo "deb [arch=amd64] https://repo.s.nemesida-waf.ru/ubuntu $os_code_name nwaf" > /etc/apt/sources.list.d/NemesidaWAF.list
   fi
   curl -s https://repo.s.nemesida-waf.ru/gpg.key | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/trusted.gpg --import
   chmod 644 /etc/apt/trusted.gpg.d/trusted.gpg
